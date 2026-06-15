@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scratchlet | Inventory</title>
+    <title>Scratchlet | Inventory Layout</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -213,13 +213,13 @@
             gap: 12px;
             flex-wrap: wrap;
         }
-
+        
         .search-bar-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
-
+        
         .search-input {
             background: rgba(0, 0, 0, 0.2);
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -233,19 +233,19 @@
             width: 220px;
             transition: border-color 0.2s, width 0.2s;
         }
-
+        
         .search-input:focus {
             border-color: rgba(255, 255, 255, 0.6);
             width: 260px;
         }
-
+        
         .search-bar-wrapper .material-icons {
             position: absolute;
             left: 14px;
             color: rgba(255, 255, 255, 0.5);
             pointer-events: none;
         }
-
+        
         .filter-dropdown {
             background: #ff7f11;
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -284,16 +284,16 @@
             background: rgba(255,255,255,0.3);
             border-radius: 10px;
         }
-
+        
         /* PACK SECTION SEPARATORS */
         .pack-section {
             margin-bottom: 30px;
         }
-
+        
         .pack-section:last-child {
             margin-bottom: 10px;
         }
-
+        
         .pack-section-title {
             font-family: "Titan One", cursive;
             font-size: 1.3rem;
@@ -303,7 +303,7 @@
             align-items: center;
             gap: 8px;
         }
-
+        
         .pack-section-line {
             border: none;
             height: 2px;
@@ -336,14 +336,21 @@
             transition: transform 0.15s ease;
         }
         
-        .blook-img-btn:hover {
+        .blook-img-btn:not(.locked):hover {
             transform: scale(1.1);
             background: rgba(255, 255, 255, 0.12);
             z-index: 2;
         }
         
-        .blook-img-btn:active {
+        .blook-img-btn:not(.locked):active {
             transform: scale(0.96);
+        }
+
+        /* GREYSCALE + LOCK FOR UNOWNED BLOOKS */
+        .blook-img-btn.locked {
+            filter: grayscale(100%);
+            opacity: 0.55;
+            cursor: not-allowed;
         }
         
         .blook-graphic {
@@ -352,7 +359,7 @@
             object-fit: contain;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
         }
-
+        
         /* NUMBER OWNED BADGE */
         .blook-qty-badge {
             position: absolute;
@@ -371,14 +378,18 @@
             box-shadow: 0 3px 6px rgba(0,0,0,0.2);
         }
 
+        .blook-qty-badge .material-icons {
+            font-size: 1rem;
+        }
+        
         .no-results-text {
             text-align: center;
             font-size: 1.2rem;
             color: rgba(255,255,255,0.6);
             padding-top: 40px;
         }
-
-        /* VIEWING BLOOK CARD MODAL */
+        
+        /* VIEWING BLOOK CARD MODAL - RECTANGLE SIDE BY SIDE */
         .modal-container {
             position: fixed;
             inset: 0;
@@ -389,30 +400,35 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease;
+            padding: 20px;
         }
-
+        
         .modal-container.show {
             opacity: 1;
             pointer-events: auto;
         }
-
+        
         .blook-view-card {
             background: #ff8c1a;
             border: 4px solid white;
             border-radius: 24px;
-            width: 340px;
-            padding: 25px;
-            text-align: center;
+            width: 520px;
+            max-width: 100%;
+            padding: 30px 25px 25px 25px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             position: relative;
             transform: scale(0.8);
             transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 25px;
         }
-
+        
         .modal-container.show .blook-view-card {
             transform: scale(1);
         }
-
+        
         .close-card-btn {
             position: absolute;
             top: 12px;
@@ -427,38 +443,56 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 5;
         }
-
-        .card-graphic-frame {
-            width: 110px;
-            height: 110px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 20px;
-            margin: 10px auto 15px auto;
+        
+        /* LEFT COLUMN */
+        .card-left-col {
+            flex: 0 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .card-graphic-frame {
+            width: 140px;
+            height: 140px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .card-graphic {
             width: 75%;
             height: 75%;
             object-fit: contain;
         }
+        
+        /* RIGHT COLUMN */
+        .card-right-col {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
 
         .card-name {
             font-family: "Titan One", cursive;
             font-size: 1.8rem;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            line-height: 1.2;
         }
-
+        
         .card-meta-row {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
         }
-
+        
         .card-pill {
             padding: 4px 12px;
             border-radius: 20px;
@@ -466,13 +500,13 @@
             font-weight: 800;
             background: rgba(0,0,0,0.15);
         }
-
+        
         .card-actions {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-
+        
         .action-btn {
             width: 100%;
             padding: 12px;
@@ -485,49 +519,68 @@
             box-shadow: 0 5px 0 rgba(0,0,0,0.2);
             transition: transform 0.1s, box-shadow 0.1s;
         }
-
+        
         .action-btn:active {
             transform: translateY(3px);
             box-shadow: 0 2px 0 rgba(0,0,0,0.2);
         }
-
+        
         .btn-sell {
             background: white;
             color: #d62424;
         }
-
+        
         .btn-sell-dupes {
             background: #ffb633;
             color: white;
             border: 2px solid rgba(255,255,255,0.4);
+        }
+
+        /* Responsive stack for very small screens */
+        @media (max-width: 480px) {
+            .blook-view-card {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 40px;
+            }
+            .card-right-col {
+                text-align: center;
+                width: 100%;
+            }
+            .card-meta-row {
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
 
 <div class="background"></div>
-
 <div class="overlay" id="overlay"></div>
 
 <div class="modal-container" id="cardModalContainer">
     <div class="blook-view-card">
         <button class="close-card-btn" id="closeCardBtn"><span class="material-icons">close</span></button>
         
-        <div class="card-graphic-frame">
-            <img src="" alt="" class="card-graphic" id="modalGraphic">
+        <div class="card-left-col">
+            <div class="card-graphic-frame">
+                <img src="" alt="" class="card-graphic" id="modalGraphic">
+            </div>
         </div>
         
-        <div class="card-name" id="modalName">Blook Name</div>
-        
-        <div class="card-meta-row">
-            <div class="card-pill" id="modalRarity">Rarity</div>
-            <div class="card-pill" id="modalChance">0%</div>
-            <div class="card-pill" id="modalOwned">Owned: 0</div>
-        </div>
-        
-        <div class="card-actions">
-            <button class="action-btn btn-sell" id="sellSingleBtn">Sell (🪙 <span id="sellValue">0</span>)</button>
-            <button class="action-btn btn-sell-dupes" id="sellDupesBtn">Sell Duplicates</button>
+        <div class="card-right-col">
+            <div class="card-name" id="modalName">Blook Name</div>
+            
+            <div class="card-meta-row">
+                <div class="card-pill" id="modalRarity">Rarity</div>
+                <div class="card-pill" id="modalChance">0%</div>
+                <div class="card-pill" id="modalOwned">Owned: 0</div>
+            </div>
+            
+            <div class="card-actions">
+                <button class="action-btn btn-sell" id="sellSingleBtn">Sell (🪙 <span id="sellValue">0</span>)</button>
+                <button class="action-btn btn-sell-dupes" id="sellDupesBtn">Sell Duplicates</button>
+            </div>
         </div>
     </div>
 </div>
@@ -547,13 +600,13 @@
     <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">chat</span> Chat</a>
     <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">swap_horiz</span> Trading</a>
     <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">settings</span> Settings</a>
-    <a href="https://google.com" class="btn primary menu-item" id="logoutBtn"><span class="material-icons">logout</span> Logout</a>
+    <button class="btn primary menu-item" id="logoutBtn"><span class="material-icons">logout</span> Logout</button>
 </div>
 
 <nav class="navbar">
     <div class="logo">Scratchlet</div>
     <div class="hud">
-        <div class="coins">🪙 <span id="coinCount">240</span></div>
+        <div class="coins">🪙 <span id="coinCount">...</span></div>
         <button class="btn secondary" id="menuBtn"><span class="material-icons">menu</span></button>
     </div>
 </nav>
@@ -568,10 +621,10 @@
             <div class="inventory-controls-row">
                 <div class="search-bar-wrapper">
                     <span class="material-icons">search</span>
-                    <input type="text" class="search-input" id="blookSearchInput" placeholder="Search Blooks..." oninput="processFilters()">
+                    <input type="text" class="search-input" id="blookSearchInput" placeholder="Search Blooks...">
                 </div>
                 
-                <select class="filter-dropdown" id="categoryFilterDropdown" onchange="processFilters()">
+                <select class="filter-dropdown" id="categoryFilterDropdown">
                     <option value="all">All Blooks</option>
                     <optgroup label="Packs">
                         <option value="pack:Breakfast Pack">Breakfast Pack</option>
@@ -590,11 +643,86 @@
     </div>
 </div>
 
-<script>
-    /* GAME ENGINE STATES */
-    let currentBalance = 240;
+<script type="module">
+    /* ================= FIREBASE INITIALIZATION ================= */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {  getAuth,  onAuthStateChanged,  signOut} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {  getFirestore,  doc,  getDoc,  setDoc} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {  
+        apiKey: "AIzaSyBzyszqkVPOn_Zbs0eacE1KQccYsTxul1E",  
+        authDomain: "scratchlet-ss.firebaseapp.com",  
+        projectId: "scratchlet-ss",  
+        storageBucket: "scratchlet-ss.firebasestorage.app",  
+        messagingSenderId: "265174756634",  
+        appId: "1:265174756634:web:a4c40ae00434f077e090a3",  
+        measurementId: "G-7B7B6VXYJX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    /* ================= GAME STATES ================= */
+    let coins = 0;
+    let ownedBlocks = new Set(); 
+    let currentUser = null;
     let selectedBlook = null;
 
+    onAuthStateChanged(auth, async (user) => {  
+        if (!user) {    
+            location.href = "https://scratchlet.github.io/login/";  
+        } else {    
+            currentUser = user;    
+            await loadUserData();  
+        }
+    });
+
+    document.getElementById("logoutBtn").onclick = async () => {  
+        try {    
+            await signOut(auth);    
+            location.href = "https://scratchlet.github.io/login/";  
+        } catch (err) {    
+            console.error(err);  
+        }
+    };
+
+    /* ================= CLOUD DATABASE CONTROL ================= */
+    async function loadUserData() {    
+        if (!currentUser) return;    
+        try {        
+            const userDocRef = doc(db, "users", currentUser.uid);        
+            const userSnapshot = await getDoc(userDocRef);                
+            if (userSnapshot.exists()) {            
+                const data = userSnapshot.data();            
+                coins = data.coins !== undefined ? data.coins : 2500;            
+                ownedBlocks = new Set(data.ownedBlocks || []);        
+            } else {            
+                coins = 2500;            
+                ownedBlocks = new Set();            
+                await saveUserData();        
+            }        
+            document.getElementById("coinCount").innerText = coins;
+            buildRuntimeInventory();
+        } catch (error) {        
+            console.error("Error pulling cloud data Profile:", error);    
+        }
+    }
+
+    async function saveUserData() {    
+        if (!currentUser) return;    
+        try {        
+            const userDocRef = doc(db, "users", currentUser.uid);        
+            await setDoc(userDocRef, {            
+                coins: coins,            
+                ownedBlocks: Array.from(ownedBlocks)        
+            }, { merge: true });    
+        } catch (error) {        
+            console.error("Error saving backup cloud sync profile:", error);    
+        }
+    }
+
+    /* ================= SIDEBAR SCRIPTS ================= */
     const menu = document.getElementById("menu");
     const overlay = document.getElementById("overlay");
     const modalContainer = document.getElementById("cardModalContainer");
@@ -624,32 +752,36 @@
     const FALLBACK_IMAGE = "https://i.postimg.cc/9fZwBPpg/Placeholder.png";
 
     /* ========================================================================
-       EDITABLE BLOOK LIST DATA STRUCTURE
+       GLOBAL IMAGE CONSTANTS & PACKS DATA STRUCTURE
        ========================================================================
-       You can freely modify the 'image' URLs and 'rarityColor' hex values below.
     */
+    const CONFIG = {
+        pizzaBlook: "https://i.postimg.cc/YSnT0Zmh/Pizza.webp",
+        fallbackPlaceholder: "https://i.postimg.cc/p9VdWF3K/Placeholder.png"
+    };
+
     const packs = {
         breakfast: {
             name: "Breakfast Pack",
             blooks: [
-                {name:"Toast", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
-                {name:"Cereal", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
-                {name:"Yogurt", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
-                {name:"Breakfast Combo", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
-                {name:"Orange Juice", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
-                {name:"Milk", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
-                {name:"Waffle", rarity:"Rare", chance:9, image:"", rarityColor:"#1e70d4"},
-                {name:"Pancakes", rarity:"Rare", chance:9, image:"", rarityColor:"#1e70d4"},
-                {name:"French Toast", rarity:"Epic", chance:5, image:"", rarityColor:"#d62424"},
-                {name:"Pizza", rarity:"Epic", chance:2, image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&auto=format&fit=crop&q=60", rarityColor:"orange"}
+                {name:"Toast", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#4CFF4C"},
+                {name:"Cereal", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#4CFF4C"},
+                {name:"Yogurt", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#4CFF4C"},
+                {name:"Breakfast Combo", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#4CFF4C"},
+                {name:"Orange Juice", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#4CFF4C"},
+                {name:"Milk", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#4CFF4C"},
+                {name:"Waffle", rarity:"Rare", chance:9, image:"", rarityColor:"#4DA3FF"},
+                {name:"Pancakes", rarity:"Rare", chance:9, image:"", rarityColor:"#4DA3FF"},
+                {name:"French Toast", rarity:"Epic", chance:5, image:"", rarityColor:"#FF4D4D"},
+                {name:"Pizza", rarity:"Epic", chance:2, image: CONFIG.pizzaBlook, rarityColor:"#FF4D4D"}
             ]
         },
         space: {
             name: "Space Pack",
             blooks: [
-                {name:"Earth", rarity:"Uncommon", chance:30, image:"", rarityColor:"#32cd32"},
-                {name:"Meteor", rarity:"Rare", chance:20, image:"", rarityColor:"#1e70d4"},
-                {name:"Alien", rarity:"Epic", chance:5, image:"", rarityColor:"#d62424"}
+                {name:"Earth", rarity:"Uncommon", chance:30, image:"", rarityColor:"#4CFF4C"},
+                {name:"Meteor", rarity:"Rare", chance:20, image:"", rarityColor:"#4DA3FF"},
+                {name:"Alien", rarity:"Epic", chance:5, image:"", rarityColor:"#FF4D4D"}
             ]
         }
     };
@@ -657,24 +789,33 @@
     const rarityValues = { "Uncommon": 5, "Rare": 20, "Epic": 75 };
 
     /* RUNTIME ENGINE INVENTORY DATA SOURCE */
-    const inventoryData = [];
-    let runtimeId = 1;
+    let inventoryData = [];
 
-    Object.keys(packs).forEach(key => {
-        const currentPack = packs[key];
-        currentPack.blooks.forEach(blook => {
-            inventoryData.push({
-                id: runtimeId++,
-                name: blook.name,
-                rarity: blook.rarity,
-                chance: blook.chance,
-                image: blook.image || "",
-                rarityColor: blook.rarityColor || "#7f8c8d", // Fallback color if missing
-                packName: currentPack.name,
-                qty: Math.floor(Math.random() * 5) + 1 
+    function buildRuntimeInventory() {
+        inventoryData = [];
+        let runtimeId = 1;
+
+        Object.keys(packs).forEach(key => {
+            const currentPack = packs[key];
+            currentPack.blooks.forEach(blook => {
+                // Count occurrences inside the array saved system
+                const collectionArray = Array.from(ownedBlocks);
+                const countOwned = collectionArray.filter(name => name === blook.name).length;
+
+                inventoryData.push({
+                    id: runtimeId++,
+                    name: blook.name,
+                    rarity: blook.rarity,
+                    chance: blook.chance,
+                    image: blook.image || "",
+                    rarityColor: blook.rarityColor || "#7f8c8d",
+                    packName: currentPack.name,
+                    qty: countOwned 
+                });
             });
         });
-    });
+        processFilters();
+    }
 
     /* INTERACTIVE FILTER AND SEARCH PROCESSING PIPELINE */
     function processFilters() {
@@ -684,7 +825,7 @@
         const searchVal = document.getElementById("blookSearchInput").value.toLowerCase().trim();
         const dropDownVal = document.getElementById("categoryFilterDropdown").value;
         
-        let validItems = inventoryData.filter(item => item.qty > 0);
+        let validItems = [...inventoryData];
         
         if(searchVal !== "") {
             validItems = validItems.filter(item => item.name.toLowerCase().includes(searchVal));
@@ -729,14 +870,26 @@
             groups[packTitle].forEach(item => {
                 const button = document.createElement("button");
                 button.className = "blook-img-btn";
-                button.onclick = () => openCardModal(item);
                 
+                const isLocked = item.qty === 0;
                 const activeSrc = (item.image && item.image !== "") ? item.image : FALLBACK_IMAGE;
 
-                button.innerHTML = `
-                    <div class="blook-qty-badge" style="background-color: ${item.rarityColor};">${item.qty}</div>
-                    <img class="blook-graphic" src="${activeSrc}" alt="${item.name}">
-                `;
+                if (isLocked) {
+                    button.classList.add("locked");
+                    button.innerHTML = `
+                        <div class="blook-qty-badge" style="background-color: #555555;">
+                            <span class="material-icons">lock</span>
+                        </div>
+                        <img class="blook-graphic" src="${activeSrc}" alt="${item.name}">
+                    `;
+                } else {
+                    button.onclick = () => openCardModal(item);
+                    button.innerHTML = `
+                        <div class="blook-qty-badge" style="background-color: ${item.rarityColor};">${item.qty}</div>
+                        <img class="blook-graphic" src="${activeSrc}" alt="${item.name}">
+                    `;
+                }
+                
                 gridEl.appendChild(button);
             });
 
@@ -775,43 +928,58 @@
         selectedBlook = null;
     }
 
-    /* QUANTITY ACCOUNT TRANSACTION PIPELINES */
-    document.getElementById("sellSingleBtn").onclick = () => {
+    /* QUANTITY ACCOUNT TRANSACTION PIEPLINES (UPDATED FOR ARRAY-SET REPLICAS) */
+    document.getElementById("sellSingleBtn").onclick = async () => {
         if (!selectedBlook || selectedBlook.qty <= 0) return;
         
         const value = rarityValues[selectedBlook.rarity] || 5;
-        currentBalance += value;
+        coins += value;
+        
+        // Remove one matching instance from array tracking profile
+        const collectionArray = Array.from(ownedBlocks);
+        const targetIndex = collectionArray.indexOf(selectedBlook.name);
+        if (targetIndex > -1) {
+            collectionArray.splice(targetIndex, 1);
+        }
+        ownedBlocks = new Set(collectionArray);
+        
+        document.getElementById("coinCount").textContent = coins;
+        await saveUserData();
+        
         selectedBlook.qty -= 1;
-        
-        updateSystemHUD();
-        
         if (selectedBlook.qty === 0) {
             closeCardModal();
         } else {
             openCardModal(selectedBlook);
         }
-        processFilters();
+        buildRuntimeInventory();
     };
 
-    document.getElementById("sellDupesBtn").onclick = () => {
+    document.getElementById("sellDupesBtn").onclick = async () => {
         if (!selectedBlook || selectedBlook.qty <= 1) return;
         
         const duplicateCount = selectedBlook.qty - 1;
         const value = (rarityValues[selectedBlook.rarity] || 5) * duplicateCount;
         
-        currentBalance += value;
-        selectedBlook.qty = 1;
+        coins += value;
         
-        updateSystemHUD();
+        // Keep only one occurrence of the item in the array tracking profile
+        const collectionArray = Array.from(ownedBlocks).filter(name => name !== selectedBlook.name);
+        collectionArray.push(selectedBlook.name);
+        ownedBlocks = new Set(collectionArray);
+        
+        document.getElementById("coinCount").textContent = coins;
+        await saveUserData();
+        
+        selectedBlook.qty = 1;
         openCardModal(selectedBlook);
-        processFilters();
+        buildRuntimeInventory();
     };
 
-    function updateSystemHUD() {
-        document.getElementById("coinCount").textContent = currentBalance;
-    }
+    // Listeners for UI interaction updates
+    document.getElementById("blookSearchInput").oninput = processFilters;
+    document.getElementById("categoryFilterDropdown").onchange = processFilters;
 
-    processFilters();
 </script>
 </body>
 </html>
