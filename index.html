@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght=400;600;700;800;900&family=Titan+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Titan+One&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
@@ -520,7 +520,7 @@
             transition: transform 0.1s, box-shadow 0.1s;
         }
         
-        .action-btn:active:not(:disabled) {
+        .action-btn:active {
             transform: translateY(3px);
             box-shadow: 0 2px 0 rgba(0,0,0,0.2);
         }
@@ -534,15 +534,6 @@
             background: #ffb633;
             color: white;
             border: 2px solid rgba(255,255,255,0.4);
-        }
-
-        /* DISABLED STATE FOR SELL DUPES (TRANSPARENT + NOT CLICKABLE) */
-        .btn-sell-dupes:disabled {
-            opacity: 0.4;
-            pointer-events: none;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
         }
 
         /* Responsive stack for very small screens */
@@ -807,6 +798,7 @@
         Object.keys(packs).forEach(key => {
             const currentPack = packs[key];
             currentPack.blooks.forEach(blook => {
+                // Count occurrences inside the array saved system
                 const collectionArray = Array.from(ownedBlocks);
                 const countOwned = collectionArray.filter(name => name === blook.name).length;
 
@@ -922,13 +914,7 @@
         const price = rarityValues[blookItem.rarity] || 5;
         document.getElementById("sellValue").textContent = price;
         
-        // Transparent and unclickable if qty <= 1
-        const sellDupesBtn = document.getElementById("sellDupesBtn");
-        if (blookItem.qty > 1) {
-            sellDupesBtn.removeAttribute("disabled");
-        } else {
-            sellDupesBtn.setAttribute("disabled", "true");
-        }
+        document.getElementById("sellDupesBtn").style.display = blookItem.qty > 1 ? "block" : "none";
 
         overlay.classList.add("show");
         modalContainer.classList.add("show");
@@ -942,13 +928,14 @@
         selectedBlook = null;
     }
 
-    /* QUANTITY ACCOUNT TRANSACTION PIPELINES */
+    /* QUANTITY ACCOUNT TRANSACTION PIEPLINES (UPDATED FOR ARRAY-SET REPLICAS) */
     document.getElementById("sellSingleBtn").onclick = async () => {
         if (!selectedBlook || selectedBlook.qty <= 0) return;
         
         const value = rarityValues[selectedBlook.rarity] || 5;
         coins += value;
         
+        // Remove one matching instance from array tracking profile
         const collectionArray = Array.from(ownedBlocks);
         const targetIndex = collectionArray.indexOf(selectedBlook.name);
         if (targetIndex > -1) {
@@ -976,6 +963,7 @@
         
         coins += value;
         
+        // Keep only one occurrence of the item in the array tracking profile
         const collectionArray = Array.from(ownedBlocks).filter(name => name !== selectedBlook.name);
         collectionArray.push(selectedBlook.name);
         ownedBlocks = new Set(collectionArray);
@@ -988,6 +976,7 @@
         buildRuntimeInventory();
     };
 
+    // Listeners for UI interaction updates
     document.getElementById("blookSearchInput").oninput = processFilters;
     document.getElementById("categoryFilterDropdown").onchange = processFilters;
 
