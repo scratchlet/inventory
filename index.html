@@ -27,7 +27,7 @@ body {
     overflow-x: hidden;
 }
 
-/* FIXED: Isolate material icons completely from general text font rules */
+/* Isolate material icons completely from general text font rules */
 .material-icons {
     font-family: 'Material Icons' !important;
     font-weight: normal;
@@ -85,6 +85,7 @@ gap:10px;
 background:rgba(255,255,255,.2);
 padding:8px 12px;
 border-radius:12px;
+font-family: "Nunito", sans-serif !important; /* FIXED FONT */
 font-weight:900;
 display: flex;
 align-items: center;
@@ -93,6 +94,7 @@ gap: 4px;
 
 /* INTERACTION EMISSION BUTTONS */
 .btn{
+font-family: "Nunito", sans-serif !important; /* FIXED FONT */
 font-weight:900;
 border:none;
 cursor:pointer;
@@ -181,6 +183,7 @@ display:flex;
 align-items:center;
 gap:10px;
 width:100%;
+font-family: "Nunito", sans-serif !important; /* FIXED FONT */
 font-weight:900;
 }
 
@@ -492,77 +495,6 @@ margin-top: 20px;
 
 .view-actions .btn { width: 100%; padding: 12px; justify-content: center; }
 
-/* ERROR ASSURANCE PANEL LAYOUTS */
-.confirm-card {
-width: 100%;
-max-width: 380px;
-border-radius: 24px;
-padding: 30px 24px;
-text-align: center;
-position: relative;
-border: 3px solid white;
-box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-background: rgba(0, 0, 0, 0.4);
-transform: scale(0.8);
-transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.28);
-}
-
-.modal-mask.show .confirm-card {
-transform: scale(1);
-}
-
-.confirm-title {
-    font-family: "Titan One", cursive !important;
-    font-size: 1.5rem;
-    line-height: 1.45;
-    margin-bottom: 25px;
-    color: #ffffff;
-    text-shadow: 0 3px 0 rgba(0,0,0,0.3);
-}
-
-.confirm-buttons {
-display: flex;
-gap: 16px;
-justify-content: center;
-}
-
-.confirm-buttons .btn {
-flex: 1;
-padding: 12px 16px;
-font-size: 1.15rem;
-border-radius: 14px;
-font-weight: 900;
-text-transform: uppercase;
-letter-spacing: 0.5px;
-border: none;
-box-shadow: none;        
-transform: none;         
-transition: opacity 0.12s ease;
-justify-content: center;
-}
-
-.btn-yes {
-background: #00e676;
-color: #003311;
-}
-.btn-yes:hover {
-background: #00e676;    
-}
-
-.btn-no {
-background: #ff1744;
-color: #ffffff;
-}
-.btn-no:hover {
-background: #ff1744;    
-}
-
-.confirm-buttons .btn:active {
-transform: none;
-box-shadow: none;
-opacity: 0.82;
-}
-
 #mainLayoutWrapper { width: 100%; }
 </style>
 </head>
@@ -592,16 +524,6 @@ opacity: 0.82;
         <div class="view-actions">
             <button class="btn primary" id="modalTargetBtn">Sell Single</button>
             <button class="btn secondary" id="modalSellAllBtn" style="background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.4);">Sell Duplicates</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal-mask" id="confirmModal" onclick="window.closeConfirmModal()">
-    <div class="confirm-card" onclick="event.stopPropagation()">
-        <div class="confirm-title" id="confirmText">Sell the last Blook for 0 tokens?</div>
-        <div class="confirm-buttons">
-            <button class="btn btn-yes" id="confirmYesBtn" onclick="window.executeConfirmedLastItemSale()">Yes</button>
-            <button class="btn btn-no" onclick="window.closeConfirmModal()">No</button>
         </div>
     </div>
 </div>
@@ -672,8 +594,6 @@ coins: 0,
 inventory: [], 
 equipped: null
 };
-
-let targetedConfirmTransactionState = null;
 
 /* ================= AUTOMATED TIMEOUT ENGINE ================= */
 let logoutTimer;
@@ -982,11 +902,7 @@ function openModal(blookName) {
   document.getElementById("modalValue").innerText = `🪙 ${details.value}`;
 
   document.getElementById("modalTargetBtn").onclick = () => {
-    if (qty === 1) {
-      openConfirmModal(blookName, details.value);
-    } else {
-      executeTransaction(blookName, 1, details.value);
-    }
+    executeTransaction(blookName, 1, details.value);
   };
   
   const sellAllBtn = document.getElementById("modalSellAllBtn");
@@ -1005,25 +921,6 @@ function openModal(blookName) {
 
 window.closeModal = function() {
   document.getElementById("cardModal").classList.remove("show");
-};
-
-function openConfirmModal(blookName, tokenCount) {
-  targetedConfirmTransactionState = { name: blookName, payout: tokenCount };
-  document.getElementById("confirmText").innerText = `Sell the last ${blookName} for ${tokenCount} tokens?`;
-  document.getElementById("confirmModal").classList.add("show");
-}
-
-window.closeConfirmModal = function() {
-  document.getElementById("confirmModal").classList.remove("show");
-  targetedConfirmTransactionState = null;
-};
-
-window.executeConfirmedLastItemSale = function() {
-  if (targetedConfirmTransactionState) {
-    executeTransaction(targetedConfirmTransactionState.name, 1, targetedConfirmTransactionState.payout);
-    window.closeConfirmModal();
-    window.closeModal();
-  }
 };
 
 async function executeTransaction(blookName, amount, totalPayout) {
@@ -1060,6 +957,9 @@ async function executeTransaction(blookName, amount, totalPayout) {
 
     await Scratchlet.addCoins(totalPayout);
     await Scratchlet.saveInventory();
+    
+    /* FIXED: Forces interface to redraw so it goes immediately back to locked grey */
+    renderInventoryPage();
   }
 }
 
@@ -1112,7 +1012,7 @@ onAuthStateChanged(auth, (user) => {
   });
 });
 
-console.log("Scratchlet Engine Typography & Interface Assets Operational 🚀");
+console.log("Scratchlet Engine Operational 🚀");
 </script>
 </body>
 </html>
