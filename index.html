@@ -1,1018 +1,817 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scratchlet | Inventory Testing</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratchlet | Inventory</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Titan+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Nunito", sans-serif;
+            font-weight: 700;
+            color: white;
+            min-height: 100vh;
+            background: linear-gradient(160deg, #fff4d6 0%, #ffc76a 25%, #ff9b2f 50%, #ff7f11 75%, #8f3200 100%);
+            overflow-x: hidden;
+        }
+        
+        /* BACKGROUND */
+        .background {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .square {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, .35);
+            background: rgba(255, 255, 255, .12);
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            from { transform: translateY(-120px); }
+            to { transform: translateY(120vh) rotate(360deg); }
+        }
+        
+        /* NAVBAR */
+        .navbar {
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            background: #ff7f11;
+            box-shadow: inset 0 -6px rgba(0,0,0,.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-family: "Titan One", cursive;
+            font-size: 2.5rem;
+            color: white;
+            text-shadow: none;
+        }
+        
+        /* HUD */
+        .hud {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .coins {
+            background: rgba(255, 255, 255, .2);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-weight: 900;
+        }
+        
+        /* BUTTONS */
+        .btn {
+            font-family: "Nunito", sans-serif;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            transition: .12s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .primary, .secondary {
+            padding: 10px 16px;
+            border-radius: 14px;
+            box-shadow: 0 6px 0 rgba(0,0,0,.25);
+        }
+        
+        .primary {
+            background: white;
+            color: #ff8c1a;
+        }
+        
+        .secondary {
+            background: rgba(255, 255, 255, .18);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, .25);
+        }
+        
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,.25);
+        }
+        
+        /* SIDEBAR */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: .25s ease;
+            z-index: 998;
+        }
+        
+        .overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100vh;
+            background: #ff8c1a;
+            box-shadow: -10px 0 25px rgba(0,0,0,.25);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: .3s ease;
+            z-index: 999;
+        }
+        
+        .sidebar.open {
+            right: 0;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: "Titan One", cursive;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 20px;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        /* INVENTORY LAYOUT */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 25px;
+        }
+        
+        /* ONE BIG UNIFIED CONTAINER CARD */
+        .big-inventory-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 28px;
+            padding: 30px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+        }
+        
+        .inventory-title {
+            font-family: "Titan One", cursive;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* CONTROLS UTILITY ROW */
+        .inventory-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        .search-bar-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght=400;600;700;800;900&family=Titan+One&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        .search-input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 10px 16px 10px 42px;
+            font-family: "Nunito", sans-serif;
+            font-weight: 700;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            width: 220px;
+            transition: border-color 0.2s, width 0.2s;
+        }
 
-<style>
-/* GLOBAL BASE STYLE LAYER */
-body, html, input, select, button, div, span, p, a {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Nunito", sans-serif;
-}
+        .search-input:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+            width: 260px;
+        }
 
-body {
-    color: white;
-    min-height: 100vh;
-    background: linear-gradient(160deg,#fff4d6 0%,#ffc76a 25%,#ff9b2f 50%,#ff7f11 75%,#8f3200 100%);
-    overflow-x: hidden;
-}
+        .search-bar-wrapper .material-icons {
+            position: absolute;
+            left: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+        }
 
-/* Isolate material icons completely from general text font rules */
-.material-icons {
-    font-family: 'Material Icons' !important;
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-    -webkit-font-smoothing: antialiased;
-}
+        .filter-dropdown {
+            background: #ff7f11;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 14px;
+            padding: 10px 32px 10px 16px;
+            font-family: "Nunito", sans-serif;
+            font-weight: 800;
+            color: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='white'><path d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+        }
+        
+        /* MAIN IMAGE BUTTON WRAPPER FOR SCROLLING */
+        .inventory-scroll-container {
+            max-height: 58vh;
+            overflow-y: auto;
+            padding-right: 8px;
+            min-height: 120px;
+        }
+        
+        .inventory-scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .inventory-scroll-container::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .inventory-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
 
-/* BACKGROUND ACCENTS */
-.background{position:fixed;inset:0;z-index:-1;overflow:hidden}
-.square{
-position:absolute;
-border:2px solid rgba(255,255,255,.35);
-background:rgba(255,255,255,.12);
-animation:fall linear infinite;
-}
+        /* PACK SECTION SEPARATORS */
+        .pack-section {
+            margin-bottom: 30px;
+        }
 
-@keyframes fall{
-from{transform:translateY(-120px)}
-to{transform:translateY(120vh) rotate(360deg)}
-}
+        .pack-section:last-child {
+            margin-bottom: 10px;
+        }
 
-/* NAVBAR */
-.navbar{
-height:70px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:0 30px;
-background:#ff7f11;
-box-shadow: inset 0 -6px rgba(0,0,0,.2);
-}
+        .pack-section-title {
+            font-family: "Titan One", cursive;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #fff1d0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-/* BRAND LOGO OVERRIDE */
-.logo {
-    font-family: "Titan One", cursive !important;
-    font-size: 2.5rem;
-}
+        .pack-section-line {
+            border: none;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.15);
+            margin-bottom: 15px;
+        }
+        
+        /* GRID ROWS FOR THE BLOONS */
+        .blook-image-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 5px;
+        }
+        
+        /* BLOOK IMAGE BUTTON */
+        .blook-img-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+            width: 84px;
+            height: 84px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease;
+        }
+        
+        .blook-img-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.12);
+            z-index: 2;
+        }
+        
+        .blook-img-btn:active {
+            transform: scale(0.96);
+        }
+        
+        .blook-graphic {
+            width: 75%;
+            height: 75%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+        }
 
-/* HUD elements */
-.hud{
-display:flex;
-align-items:center;
-gap:10px;
-}
+        /* NUMBER OWNED BADGE */
+        .blook-qty-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-family: "Titan One", cursive;
+            font-size: 0.85rem;
+            z-index: 3;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
 
-.coins{
-background:rgba(255,255,255,.2);
-padding:8px 12px;
-border-radius:12px;
-font-family: "Nunito", sans-serif !important; /* FIXED FONT */
-font-weight:900;
-display: flex;
-align-items: center;
-gap: 4px;
-}
+        .no-results-text {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.6);
+            padding-top: 40px;
+        }
 
-/* INTERACTION EMISSION BUTTONS */
-.btn{
-font-family: "Nunito", sans-serif !important; /* FIXED FONT */
-font-weight:900;
-border:none;
-cursor:pointer;
-transition:.12s ease;
-text-decoration:none;
-display:inline-flex;
-align-items:center;
-gap:6px;
-}
+        /* VIEWING BLOOK CARD MODAL */
+        .modal-container {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
 
-.primary,.secondary{
-padding:10px 16px;
-border-radius:14px;
-box-shadow:0 6px 0 rgba(0,0,0,.25);
-}
+        .modal-container.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
-.primary{
-background:white;
-color:#ff8c1a;}
+        .blook-view-card {
+            background: #ff8c1a;
+            border: 4px solid white;
+            border-radius: 24px;
+            width: 340px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.2s ease;
+        }
 
-.secondary{
-background:rgba(255,255,255,.18);
-color:white;
-border:2px solid rgba(255,255,255,.25);
-}
+        .modal-container.show .blook-view-card {
+            transform: scale(1);
+        }
 
-.btn:active{
-transform:translateY(4px);
-box-shadow:0 2px 0 rgba(0,0,0,.25);
-}
+        .close-card-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.btn:disabled {
-background: rgba(255,255,255,0.05) !important;
-color: rgba(255,255,255,0.3) !important;
-border-color: rgba(255,255,255,0.1) !important;
-box-shadow: none !important;
-transform: none !important;
-cursor: not-allowed;
-}
+        .card-graphic-frame {
+            width: 110px;
+            height: 110px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px;
+            margin: 10px auto 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-/* COMPACT MENU SIDEBAR */
-.overlay{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.4);
-opacity:0;
-pointer-events:none;
-transition:.25s ease;
-z-index:998;
-}
+        .card-graphic {
+            width: 75%;
+            height: 75%;
+            object-fit: contain;
+        }
 
-.overlay.show{
-opacity:1;
-pointer-events:auto;
-}
+        .card-name {
+            font-family: "Titan One", cursive;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
 
-.sidebar{
-position:fixed;
-top:0;
-right:-320px;
-width:300px;
-height:100vh;
-background:#ff8c1a;
-box-shadow:-10px 0 25px rgba(0,0,0,.25);
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:10px;
-transition:.3s ease;
-z-index:999;
-}
+        .card-meta-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-.sidebar.open{right:0}
+        .card-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            background: rgba(0,0,0,0.15);
+        }
 
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    font-family: "Titan One", cursive !important;
-}
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-/* VERTICAL HUB APP ACTIONS */
-.menu-item{
-display:flex;
-align-items:center;
-gap:10px;
-width:100%;
-font-family: "Nunito", sans-serif !important; /* FIXED FONT */
-font-weight:900;
-}
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 14px;
+            font-family: "Nunito", sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
 
-/* STRUCTURE CANVAS BOUNDS */
-.container{
-max-width:1200px;
-margin:auto;
-padding:25px;
-}
+        .action-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
 
-/* VIEWPORT CONTAINER CARD */
-.master-inventory-card {
-background: rgba(0, 0, 0, 0.4);
-border: 3px solid rgba(255, 255, 255, 0.15);
-border-radius: 28px;
-padding: 25px;
-box-shadow: 0 12px 32px rgba(0,0,0,0.35);
-width: 100%;
-}
+        .btn-sell {
+            background: white;
+            color: #d62424;
+        }
 
-/* CONTROL DECK CONTROLS */
-.inventory-controls {
-display: flex;
-gap: 15px;
-margin-bottom: 25px;
-flex-wrap: wrap;
-align-items: center;
-}
-
-.search-wrapper {
-position: relative;
-flex: 1;
-min-width: 200px;
-}
-
-.search-wrapper .material-icons {
-position: absolute;
-left: 14px;
-top: 50%;
-transform: translateY(-50%);
-color: rgba(255, 255, 255, 0.5);
-pointer-events: none;
-}
-
-.inventory-input {
-width: 100%;
-background: rgba(0, 0, 0, 0.25);
-border: 2px solid rgba(255, 255, 255, 0.15);
-border-radius: 14px;
-padding: 12px 16px;
-color: white;
-font-weight: 700;
-font-size: 1rem;
-outline: none;
-transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.inventory-input-search {
-padding-left: 44px;
-}
-
-.inventory-input:focus {
-border-color: rgba(255, 255, 255, 0.4);
-background: rgba(0, 0, 0, 0.35);
-}
-
-.inventory-select {
-min-width: 180px;
-cursor: pointer;
-appearance: none;
-padding-right: 40px;
-background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='white'><path d='M7 10l5 5 5-5z'/></svg>");
-background-repeat: no-repeat;
-background-position: right 12px center;
-font-weight: 700;
-}
-
-.inventory-select option {
-background: #ff8c1a;
-color: white;
-font-weight: 700;
-}
-
-.toggle-active-state {
-background: white !important;
-color: #ff8c1a !important;
-border-color: white !important;
-}
-
-/* OVERFLOW CONTROLLER BOX */
-.inventory-scrollbox {
-max-height: 52vh;
-overflow-y: auto;
-padding-right: 15px;
-}
-
-.inventory-scrollbox::-webkit-scrollbar {
-width: 10px;
-}
-.inventory-scrollbox::-webkit-scrollbar-track {
-background: rgba(0, 0, 0, 0.2);
-border-radius: 10px;
-}
-.inventory-scrollbox::-webkit-scrollbar-thumb {
-background: rgba(255, 255, 255, 0.25);
-border-radius: 10px;
-border: 2px solid transparent;
-background-clip: padding-box;
-}
-.inventory-scrollbox::-webkit-scrollbar-thumb:hover {
-background: rgba(255, 255, 255, 0.4);
-border: 2px solid transparent;
-background-clip: padding-box;
-}
-
-/* SEPARATORS FOR COLLECTION SHELVES */
-.pack-inline-section {
-margin-bottom: 30px;
-}
-.pack-inline-section:last-child {
-margin-bottom: 5px;
-}
-
-.pack-card-header {
-    font-family: "Titan One", cursive !important;
-    font-size: 1.5rem;
-    margin-bottom: 18px;
-    padding-bottom: 8px;
-    border-bottom: 3px solid rgba(255, 255, 255, 0.1);
-    letter-spacing: 0.5px;
-    text-shadow: 0 3px 0 rgba(0,0,0,0.3);
-}
-
-/* ITEM PLACEMENT MATRIX MAP */
-.blook-button-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-gap: 20px;
-}
-
-/* CARD ENGINE TILES */
-.blook-image-btn {
-background: rgba(255, 255, 255, 0.08);
-border: 2px solid rgba(255, 255, 255, 0.15);
-border-radius: 18px;
-height: 95px;
-width: 95px;
-display: flex;
-align-items: center;
-justify-content: center;
-position: relative;
-cursor: pointer;
-transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.15s ease;
-padding: 10px;
-}
-
-.blook-image-btn:hover {
-transform: scale(1.08);
-background: rgba(255, 255, 255, 0.15);
-}
-
-.blook-image-btn:active {
-transform: scale(0.95);
-}
-
-.blook-btn-img {
-width: 100%;
-height: 100%;
-object-fit: contain;
-filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
-user-select: none;
-}
-
-/* ACCESSIBILITY GREYED ASSETS */
-.blook-image-btn.locked-blook {
-background: rgba(0, 0, 0, 0.2);
-border: 2px dashed rgba(255, 255, 255, 0.1);
-cursor: not-allowed;
-}
-
-.blook-image-btn.locked-blook:hover {
-transform: none;
-background: rgba(0, 0, 0, 0.2);
-}
-
-.blook-image-btn.locked-blook .blook-btn-img {
-filter: grayscale(100%) opacity(35%);
-}
-
-.google-lock-icon {
-position: absolute;
-font-size: 2rem;
-color: rgba(255, 255, 255, 0.4);
-pointer-events: none;
-z-index: 3;
-text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-}
-
-/* BADGES QUANTITY HOVERERS */
-.blook-badge-circle {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: "Titan One", cursive !important;
-    font-size: 0.85rem;
-    color: white;
-    text-shadow: 0 2px 3px rgba(0,0,0,0.6);
-    border: 2.5px solid white;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.4);
-    z-index: 2;
-    user-select: none;
-}
-
-/* POPUP SCREEN BASE MASK */
-.modal-mask {
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.7);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 1000;
-opacity: 0;
-transition: opacity 0.2s ease;
-padding: 20px;
-}
-
-.modal-mask.show {
-display: flex;
-opacity: 1;
-}
-
-.view-card {
-width: 100%;
-max-width: 380px;
-border-radius: 24px;
-padding: 30px 20px;
-text-align: center;
-position: relative;
-border: 3px solid white;
-box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-background: rgba(0,0,0,0.4);
-transform: scale(0.8);
-transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.modal-mask.show .view-card {
-transform: scale(1);
-}
-
-.close-modal {
-position: absolute;
-top: 15px;
-right: 15px;
-background: rgba(0,0,0,0.3);
-border: none;
-color: white;
-border-radius: 50%;
-width: 36px;
-height: 36px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-
-.view-image {
-width: 120px;
-height: 120px;
-margin: 15px auto;
-filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
-display: block;
-object-fit: contain;
-}
-
-.view-title {
-    font-family: "Titan One", cursive !important;
-    font-size: 2.2rem;
-    margin-bottom: 5px;
-}
-
-.item-pack {
-font-weight: 800;
-}
-
-.view-stat-row {
-display: flex;
-justify-content: space-around;
-background: rgba(0,0,0,0.25);
-padding: 12px;
-border-radius: 14px;
-margin: 15px 0;
-font-weight: 700;
-font-size: 0.95rem;
-}
-
-.view-actions {
-display: flex;
-flex-direction: column;
-gap: 10px;
-margin-top: 20px;
-}
-
-.view-actions .btn { width: 100%; padding: 12px; justify-content: center; }
-
-#mainLayoutWrapper { width: 100%; }
-</style>
+        .btn-sell-dupes {
+            background: #ffb633;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="background"></div>
+
 <div class="overlay" id="overlay"></div>
 
-<div class="modal-mask" id="cardModal" onclick="window.closeModal()">
-    <div class="view-card" id="modalCard" onclick="event.stopPropagation()">
-        <button class="close-modal" onclick="window.closeModal()"><span class="material-icons">close</span></button>
-        <img class="view-image" id="modalImg" src="" alt="Blook">
-        <div class="view-title" id="modalName">Blook Name</div>
-        <div id="modalPack" class="item-pack" style="background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; text-transform: uppercase; display:inline-block; font-size: 0.7rem;">Pack</div>
+<div class="modal-container" id="cardModalContainer">
+    <div class="blook-view-card">
+        <button class="close-card-btn" id="closeCardBtn"><span class="material-icons">close</span></button>
         
-        <div class="view-stat-row">
-            <div>Rarity: <span id="modalRarity">Rarity</span></div>
-            <div>Drop Chance: <span id="modalDrop" style="color: #fff4d6;">0%</span></div>
+        <div class="card-graphic-frame">
+            <img src="" alt="" class="card-graphic" id="modalGraphic">
         </div>
-
-        <div class="view-stat-row">
-            <div>Owned: <span id="modalOwned" style="color:#ffcc00;">0</span></div>
-            <div>Value: <span id="modalValue" style="color:#ffcc00;">🪙 0</span></div>
+        
+        <div class="card-name" id="modalName">Blook Name</div>
+        
+        <div class="card-meta-row">
+            <div class="card-pill" id="modalRarity">Rarity</div>
+            <div class="card-pill" id="modalChance">0%</div>
+            <div class="card-pill" id="modalOwned">Owned: 0</div>
         </div>
-
-        <div class="view-actions">
-            <button class="btn primary" id="modalTargetBtn">Sell Single</button>
-            <button class="btn secondary" id="modalSellAllBtn" style="background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.4);">Sell Duplicates</button>
+        
+        <div class="card-actions">
+            <button class="action-btn btn-sell" id="sellSingleBtn">Sell (🪙 <span id="sellValue">0</span>)</button>
+            <button class="action-btn btn-sell-dupes" id="sellDupesBtn">Sell Duplicates</button>
         </div>
     </div>
 </div>
 
 <div class="sidebar" id="menu">
-<div class="sidebar-header"><div>Menu</div><button class="btn secondary" id="closeMenu"><span class="material-icons">close</span></button></div>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">home</span> Home</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">store</span> Market</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">inventory_2</span> Inventory</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">bar_chart</span> Stats</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">article</span> News</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">post_add</span> Posts</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">sports_esports</span> Play</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">chat</span> Chat</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">swap_horiz</span> Trading</a>
-<a href="#" class="btn secondary menu-item"><span class="material-icons">settings</span> Settings</a>
-<button class="btn primary menu-item" id="logoutBtn"><span class="material-icons">logout</span> Logout</button>
+    <div class="sidebar-header">
+        <div>Menu</div>
+        <button class="btn secondary" id="closeMenu"><span class="material-icons">close</span></button>
+    </div>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">home</span> Home</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">store</span> Market</a>
+    <a href="https://google.com" class="btn secondary menu-item active"><span class="material-icons">inventory_2</span> Inventory</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">bar_chart</span> Stats</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">article</span> News</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">post_add</span> Posts</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">sports_esports</span> Play</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">chat</span> Chat</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">swap_horiz</span> Trading</a>
+    <a href="https://google.com" class="btn secondary menu-item"><span class="material-icons">settings</span> Settings</a>
+    <a href="https://google.com" class="btn primary menu-item" id="logoutBtn"><span class="material-icons">logout</span> Logout</a>
 </div>
 
 <nav class="navbar">
-<div class="logo">Scratchlet</div>
-<div class="hud">
-<div class="coins">🪙 0</div>
-<button class="btn secondary" id="menuBtn"><span class="material-icons">menu</span></button>
-</div>
+    <div class="logo">Scratchlet</div>
+    <div class="hud">
+        <div class="coins">🪙 <span id="coinCount">240</span></div>
+        <button class="btn secondary" id="menuBtn"><span class="material-icons">menu</span></button>
+    </div>
 </nav>
 
 <div class="container">
-    <div id="mainLayoutWrapper"></div>
+    <div class="big-inventory-card">
+        <div class="inventory-header">
+            <div class="inventory-title">
+                <span class="material-icons" style="font-size: 2.2rem;">inventory_2</span> Blook Collection
+            </div>
+            
+            <div class="inventory-controls-row">
+                <div class="search-bar-wrapper">
+                    <span class="material-icons">search</span>
+                    <input type="text" class="search-input" id="blookSearchInput" placeholder="Search Blooks..." oninput="processFilters()">
+                </div>
+                
+                <select class="filter-dropdown" id="categoryFilterDropdown" onchange="processFilters()">
+                    <option value="all">All Blooks</option>
+                    <optgroup label="Packs">
+                        <option value="pack:Breakfast Pack">Breakfast Pack</option>
+                        <option value="pack:Space Pack">Space Pack</option>
+                    </optgroup>
+                    <optgroup label="Rarities">
+                        <option value="rarity:Uncommon">Uncommon</option>
+                        <option value="rarity:Rare">Rare</option>
+                        <option value="rarity:Epic">Epic</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+        
+        <div class="inventory-scroll-container" id="inventoryScrollContainer"></div>
+    </div>
 </div>
 
-<script type="module">
-/* ================= SCRATCHLET GLOBAL ENGINE ================= */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-getAuth,
-onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+<script>
+    /* GAME ENGINE STATES */
+    let currentBalance = 240;
+    let selectedBlook = null;
 
-import {
-getFirestore,
-doc,
-onSnapshot,
-updateDoc,
-increment
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-/* ================= FIREBASE CLOUD DECK ================= */
-const firebaseConfig = {
-apiKey: "AIzaSyBzyszqkVPOn_Zbs0eacE1KQccYsTxul1E",
-authDomain: "scratchlet-ss.firebaseapp.com",
-projectId: "scratchlet-ss",
-storageBucket: "scratchlet-ss.firebasestorage.app",
-messagingSenderId: "265174756634",
-appId: "1:265174756634:web:a4c40ae00434f077e090a3"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-/* ================= ALL SYSTEM GLOBAL OBJECTS ================= */
-window.Scratchlet = {
-user: null,
-ref: null,
-coins: 0,
-inventory: [], 
-equipped: null
-};
-
-/* ================= AUTOMATED TIMEOUT ENGINE ================= */
-let logoutTimer;
-const TIME_LIMIT = 5 * 60 * 1000;
-
-function resetLogoutTimer() {
-clearTimeout(logoutTimer);
-
-logoutTimer = setTimeout(async () => {
-await signOut(auth);
-location.href = "https://scratchlet.github.io/login/";
-}, TIME_LIMIT);
-}
-
-["click","mousemove","keydown","scroll","touchstart"].forEach(ev=>{
-window.addEventListener(ev, resetLogoutTimer);
-});
-
-/* ================= CLOUD WRITER SYSTEM PROFILES ================= */
-window.Scratchlet.saveCoins = async (amount) => {
-if (!Scratchlet.ref) return;
-await updateDoc(Scratchlet.ref, {
-coins: amount
-});
-};
-
-window.Scratchlet.addCoins = async (amount) => {
-if (!Scratchlet.ref) return;
-await updateDoc(Scratchlet.ref, {
-coins: increment(amount)
-});
-};
-
-window.Scratchlet.saveInventory = async () => {
-if (!Scratchlet.ref) return;
-await updateDoc(Scratchlet.ref, {
-ownedBlocks: Scratchlet.inventory 
-});
-};
-
-window.Scratchlet.equip = async (item) => {
-if (!Scratchlet.ref) return;
-await updateDoc(Scratchlet.ref, {
-equipped: item
-});
-};
-
-/* ================= MAIN SHEET DATA REGISTRY ================= */
-const CONFIG = window.CONFIG || { pizzaBlook: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png" };
-
-const BLOOK_REGISTRY = {
-  "Toast":           { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "uncommon", value: 5,   chance: "12.5%", color: "#4CFF4C" },
-  "Cereal":          { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "uncommon", value: 5,   chance: "12.5%", color: "#4CFF4C" },
-  "Yogurt":          { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "uncommon", value: 5,   chance: "12.5%", color: "#4CFF4C" },
-  "Breakfast Combo": { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "uncommon", value: 5,   chance: "12.5%", color: "#4CFF4C" },
-  "Orange Juice":    { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "uncommon", value: 5,   chance: "12.5%", color: "#4CFF4C" },
-  "Milk":            { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "uncommon", value: 5,   chance: "12.5%", color: "#4CFF4C" },
-  "Waffle":          { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "rare",     value: 10,  chance: "9.0%",  color: "#4DA3FF" },
-  "Pancakes":        { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "rare",     value: 10,  chance: "9.0%",  color: "#4DA3FF" },
-  "French Toast":    { pack: "Breakfast Pack", art: "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "epic",     value: 75,  chance: "5.0%",  color: "#FF4D4D" },
-  "Pizza":           { pack: "Breakfast Pack", art: CONFIG.pizzaBlook || "https://i.postimg.cc/8Cs9nSzs/Breakfast.png", rarity: "epic", value: 75, chance: "2.0%", color: "#FF4D4D" },
-  "Earth":           { pack: "Space Pack",     art: "https://i.postimg.cc/6q8mX6mG/Space.png",     rarity: "uncommon", value: 5,   chance: "30.0%", color: "#4CFF4C" },
-  "Meteor":          { pack: "Space Pack",     art: "https://i.postimg.cc/6q8mX6mG/Space.png",     rarity: "rare",     value: 10,  chance: "20.0%", color: "#4DA3FF" },
-  "Alien":           { pack: "Space Pack",     art: "https://i.postimg.cc/6q8mX6mG/Space.png",     rarity: "epic",     value: 75,  chance: "5.0%",  color: "#FF4D4D" }
-};
-
-let currentSearchQuery = "";
-let currentFilterCategory = "all";
-let isPackSeparationEnabled = true;
-
-function parseInventoryTallies() {
-  const counts = {};
-  Scratchlet.inventory.forEach(itemName => {
-    counts[itemName] = (counts[itemName] || 0) + 1;
-  });
-  return counts;
-}
-
-function generateGlossyGradient(hexColor) {
-  return `linear-gradient(135deg, ${hexColor} 0%, rgba(0,0,0,0.15) 100%)`;
-}
-
-function renderInventoryPage() {
-  const displayContainer = document.getElementById("mainLayoutWrapper");
-  if (!displayContainer) return;
-
-  document.querySelector(".coins").innerText = `🪙 ${Scratchlet.coins.toLocaleString()}`;
-  displayContainer.innerHTML = "";
-
-  const masterCard = document.createElement("div");
-  masterCard.className = "master-inventory-card";
-
-  const controlBar = document.createElement("div");
-  controlBar.className = "inventory-controls";
-
-  const searchWrap = document.createElement("div");
-  searchWrap.className = "search-wrapper";
-  searchWrap.innerHTML = `<span class="material-icons">search</span>`;
-  
-  const searchInput = document.createElement("input");
-  searchInput.type = "text";
-  searchInput.className = "inventory-input inventory-input-search";
-  searchInput.placeholder = "Search Blooks...";
-  searchInput.value = currentSearchQuery;
-  searchInput.oninput = (e) => {
-    currentSearchQuery = e.target.value.toLowerCase();
-    filterItemsVisibility();
-  };
-  searchWrap.appendChild(searchInput);
-
-  const filterSelect = document.createElement("select");
-  filterSelect.className = "inventory-input inventory-select";
-  filterSelect.innerHTML = `
-    <option value="all">All Categories</option>
-    <optgroup label="Packs">
-      <option value="pack:Breakfast Pack">Breakfast Pack</option>
-      <option value="pack:Space Pack">Space Pack</option>
-    </optgroup>
-    <optgroup label="Rarities">
-      <option value="rarity:uncommon">Uncommon</option>
-      <option value="rarity:rare">Rare</option>
-      <option value="rarity:epic">Epic</option>
-    </optgroup>
-  `;
-  filterSelect.value = currentFilterCategory;
-  filterSelect.onchange = (e) => {
-    currentFilterCategory = e.target.value;
-    filterItemsVisibility();
-  };
-
-  const separationToggleBtn = document.createElement("button");
-  separationToggleBtn.className = "btn secondary";
-  separationToggleBtn.style.padding = "12px 16px";
-  separationToggleBtn.style.height = "48px";
-  separationToggleBtn.style.borderRadius = "14px";
-  separationToggleBtn.style.whiteSpace = "nowrap";
-  
-  if (isPackSeparationEnabled) {
-    separationToggleBtn.classList.add("toggle-active-state");
-    separationToggleBtn.innerHTML = `<span class="material-icons">grid_on</span> Separate Packs`;
-  } else {
-    separationToggleBtn.innerHTML = `<span class="material-icons">grid_off</span> Combined Grid`;
-  }
-
-  separationToggleBtn.onclick = () => {
-    isPackSeparationEnabled = !isPackSeparationEnabled;
-    renderInventoryPage();
-  };
-
-  controlBar.appendChild(searchWrap);
-  controlBar.appendChild(filterSelect);
-  controlBar.appendChild(separationToggleBtn);
-  masterCard.appendChild(controlBar);
-
-  const scrollbox = document.createElement("div");
-  scrollbox.className = "inventory-scrollbox";
-
-  const counts = parseInventoryTallies();
-
-  if (isPackSeparationEnabled) {
-    let groupedPacks = {};
-    Object.keys(BLOOK_REGISTRY).forEach(blookName => {
-      const details = BLOOK_REGISTRY[blookName];
-      if (!groupedPacks[details.pack]) {
-        groupedPacks[details.pack] = [];
-      }
-      const qty = counts[blookName] || 0;
-      groupedPacks[details.pack].push({ name: blookName, qty: qty, ...details });
-    });
-
-    Object.keys(groupedPacks).forEach(packName => {
-      const packSection = document.createElement("div");
-      packSection.className = "pack-inline-section";
-
-      const packHeader = document.createElement("div");
-      packHeader.className = "pack-card-header";
-      packHeader.innerText = packName;
-      packSection.appendChild(packHeader);
-
-      const buttonGrid = document.createElement("div");
-      buttonGrid.className = "blook-button-grid";
-
-      groupedPacks[packName].forEach(item => {
-        const blookButton = createBlookButtonNode(item);
-        buttonGrid.appendChild(blookButton);
-      });
-
-      packSection.appendChild(buttonGrid);
-      scrollbox.appendChild(packSection);
-    });
-  } else {
-    const packSection = document.createElement("div");
-    packSection.className = "pack-inline-section";
-
-    const buttonGrid = document.createElement("div");
-    buttonGrid.className = "blook-button-grid";
-
-    Object.keys(BLOOK_REGISTRY).forEach(blookName => {
-      const item = BLOOK_REGISTRY[blookName];
-      const qty = counts[blookName] || 0;
-      const fullItemObj = { name: blookName, qty: qty, ...item };
-      
-      const blookButton = createBlookButtonNode(fullItemObj);
-      buttonGrid.appendChild(blookButton);
-    });
-
-    packSection.appendChild(buttonGrid);
-    scrollbox.appendChild(packSection);
-  }
-
-  masterCard.appendChild(scrollbox);
-  displayContainer.appendChild(masterCard);
-  
-  filterItemsVisibility();
-}
-
-function createBlookButtonNode(item) {
-  const blookButton = document.createElement("button");
-  blookButton.setAttribute("data-blook-name", item.name.toLowerCase());
-  blookButton.setAttribute("data-blook-rarity", item.rarity.toLowerCase());
-  blookButton.setAttribute("data-blook-pack", item.pack.toLowerCase());
-  
-  if (item.qty > 0) {
-    blookButton.className = "blook-image-btn"; 
-    blookButton.onclick = () => openModal(item.name);
-    blookButton.innerHTML = `
-      <div class="blook-badge-circle" style="background: ${generateGlossyGradient(item.color)}">
-        ${item.qty}
-      </div>
-      <img class="blook-btn-img" src="${item.art || 'https://i.postimg.cc/8Cs9nSzs/Breakfast.png'}" alt="${item.name}">
-    `;
-  } else {
-    blookButton.className = "blook-image-btn locked-blook";
-    blookButton.disabled = true; 
-    blookButton.innerHTML = `
-      <span class="material-icons google-lock-icon">lock</span>
-      <img class="blook-btn-img" src="${item.art || 'https://i.postimg.cc/8Cs9nSzs/Breakfast.png'}" alt="${item.name}">
-    `;
-  }
-  return blookButton;
-}
-
-function filterItemsVisibility() {
-  const sections = document.querySelectorAll(".pack-inline-section");
-  
-  sections.forEach(section => {
-    const buttons = section.querySelectorAll(".blook-image-btn");
-    let visibleButtonsInPack = 0;
-
-    buttons.forEach(btn => {
-      const name = btn.getAttribute("data-blook-name");
-      const rarity = btn.getAttribute("data-blook-rarity");
-      const pack = btn.getAttribute("data-blook-pack");
-
-      const matchesSearch = name.includes(currentSearchQuery);
-      
-      let matchesCategory = true;
-      if (currentFilterCategory !== "all") {
-        const [filterType, filterValue] = currentFilterCategory.split(":");
-        if (filterType === "rarity" && rarity !== filterValue.toLowerCase()) {
-          matchesCategory = false;
-        }
-        if (filterType === "pack" && pack !== filterValue.toLowerCase()) {
-          matchesCategory = false;
-        }
-      }
-
-      if (matchesSearch && matchesCategory) {
-        btn.style.display = "flex";
-        visibleButtonsInPack++;
-      } else {
-        btn.style.display = "none";
-      }
-    });
-
-    if (visibleButtonsInPack > 0) {
-      section.style.display = "block";
-    } else {
-      section.style.display = "none";
-    }
-  });
-}
-
-function openModal(blookName) {
-  const counts = parseInventoryTallies();
-  const qty = counts[blookName] || 0;
-  if(qty <= 0) return;
-
-  const details = BLOOK_REGISTRY[blookName];
-  const modal = document.getElementById("cardModal");
-  const cardFrame = document.getElementById("modalCard");
-
-  let cleanRarity = details.rarity.toLowerCase();
-  cardFrame.className = `view-card card-${cleanRarity}`;
-
-  document.getElementById("modalImg").src = details.art || 'https://i.postimg.cc/8Cs9nSzs/Breakfast.png';
-  document.getElementById("modalName").innerText = blookName;
-  document.getElementById("modalPack").innerText = details.pack;
-  
-  const rarityEl = document.getElementById("modalRarity");
-  rarityEl.innerText = details.rarity;
-  rarityEl.style.color = details.color;
-
-  document.getElementById("modalDrop").innerText = details.chance;
-  document.getElementById("modalOwned").innerText = qty;
-  document.getElementById("modalValue").innerText = `🪙 ${details.value}`;
-
-  document.getElementById("modalTargetBtn").onclick = () => {
-    executeTransaction(blookName, 1, details.value);
-  };
-  
-  const sellAllBtn = document.getElementById("modalSellAllBtn");
-  if (qty > 1) {
-    sellAllBtn.disabled = false;
-    const duplicatesCount = qty - 1;
-    const totalPayout = details.value * duplicatesCount;
-    sellAllBtn.onclick = () => executeTransaction(blookName, duplicatesCount, totalPayout);
-  } else {
-    sellAllBtn.disabled = true;
-    sellAllBtn.onclick = null;
-  }
-
-  modal.classList.add("show");
-}
-
-window.closeModal = function() {
-  document.getElementById("cardModal").classList.remove("show");
-};
-
-async function executeTransaction(blookName, amount, totalPayout) {
-  const currentArray = [...Scratchlet.inventory];
-  
-  let removedCount = 0;
-  for (let i = currentArray.length - 1; i >= 0; i--) {
-    if (currentArray[i] === blookName && removedCount < amount) {
-      currentArray.splice(i, 1);
-      removedCount++;
-    }
-  }
-
-  if (removedCount > 0) {
-    Scratchlet.inventory = currentArray;
+    const menu = document.getElementById("menu");
+    const overlay = document.getElementById("overlay");
+    const modalContainer = document.getElementById("cardModalContainer");
     
-    const counts = parseInventoryTallies();
-    const remainingQty = counts[blookName] || 0;
-
-    if (remainingQty <= 0) {
-      window.closeModal();
-    } else {
-      document.getElementById("modalOwned").innerText = remainingQty;
-      const sellAllBtn = document.getElementById("modalSellAllBtn");
-      if (remainingQty > 1) {
-        const remainingDuplicates = remainingQty - 1;
-        const remainingPayout = BLOOK_REGISTRY[blookName].value * remainingDuplicates;
-        sellAllBtn.onclick = () => executeTransaction(blookName, remainingDuplicates, remainingPayout);
-      } else {
-        sellAllBtn.disabled = true;
-        sellAllBtn.onclick = null;
-      }
+    document.getElementById("menuBtn").onclick = () => { menu.classList.add("open"); overlay.classList.add("show"); };
+    document.getElementById("closeMenu").onclick = closeMenu;
+    overlay.onclick = () => { closeMenu(); closeCardModal(); };
+    document.getElementById("closeCardBtn").onclick = closeCardModal;
+    
+    function closeMenu() {
+        menu.classList.remove("open");
+        overlay.classList.remove("show");
     }
 
-    await Scratchlet.addCoins(totalPayout);
-    await Scratchlet.saveInventory();
-    
-    /* FIXED: Forces interface to redraw so it goes immediately back to locked grey */
-    renderInventoryPage();
-  }
-}
+    /* BACKGROUND GENERATOR */
+    const bg = document.querySelector(".background");
+    for(let i=0; i<45; i++) {
+        const s = document.createElement("div");
+        s.className = "square";
+        s.style.left = Math.random() * 100 + "%";
+        s.style.width = s.style.height = (Math.random() * 25 + 10) + "px";
+        s.style.opacity = Math.random() * 0.5 + 0.2;
+        s.style.animationDuration = (Math.random() * 10 + 6) + "s";
+        bg.appendChild(s);
+    }
 
-/* SIDEBAR RESTRUCTURING LOGIC */
-const menu = document.getElementById("menu");
-const overlay = document.getElementById("overlay");
-document.getElementById("menuBtn").onclick = () => { menu.classList.add("open"); overlay.classList.add("show"); };
-document.getElementById("closeMenu").onclick = closeMenu;
-overlay.onclick = closeMenu;
-function closeMenu() { menu.classList.remove("open"); overlay.classList.remove("show"); }
+    const FALLBACK_IMAGE = "https://i.postimg.cc/9fZwBPpg/Placeholder.png";
 
-document.getElementById("logoutBtn").onclick = async () => {
-  await signOut(auth);
-};
+    /* ========================================================================
+       EDITABLE BLOOK LIST DATA STRUCTURE
+       ========================================================================
+       You can freely modify the 'image' URLs and 'rarityColor' hex values below.
+    */
+    const packs = {
+        breakfast: {
+            name: "Breakfast Pack",
+            blooks: [
+                {name:"Toast", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
+                {name:"Cereal", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
+                {name:"Yogurt", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
+                {name:"Breakfast Combo", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
+                {name:"Orange Juice", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
+                {name:"Milk", rarity:"Uncommon", chance:12.5, image:"", rarityColor:"#32cd32"},
+                {name:"Waffle", rarity:"Rare", chance:9, image:"", rarityColor:"#1e70d4"},
+                {name:"Pancakes", rarity:"Rare", chance:9, image:"", rarityColor:"#1e70d4"},
+                {name:"French Toast", rarity:"Epic", chance:5, image:"", rarityColor:"#d62424"},
+                {name:"Pizza", rarity:"Epic", chance:2, image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&auto=format&fit=crop&q=60", rarityColor:"orange"}
+            ]
+        },
+        space: {
+            name: "Space Pack",
+            blooks: [
+                {name:"Earth", rarity:"Uncommon", chance:30, image:"", rarityColor:"#32cd32"},
+                {name:"Meteor", rarity:"Rare", chance:20, image:"", rarityColor:"#1e70d4"},
+                {name:"Alien", rarity:"Epic", chance:5, image:"", rarityColor:"#d62424"}
+            ]
+        }
+    };
 
-/* FLOATING AMBIENT BACKGROUND PARTICLES */
-const bg = document.querySelector(".background");
-for(let i=0;i<45;i++){
-  const s=document.createElement("div"); s.className="square";
-  s.style.left=Math.random()*100+"%"; s.style.width=s.style.height=(Math.random()*25+10)+"px";
-  s.style.opacity=Math.random()*0.5+0.2; s.style.animationDuration=(Math.random()*10+6)+"s";
-  bg.appendChild(s);
-}
+    const rarityValues = { "Uncommon": 5, "Rare": 20, "Epic": 75 };
 
-/* ENGINE LIVE REDRAW DISPATCH OVERVIEW */
-window.addEventListener("scratchlet-update", () => {
-  renderInventoryPage();
-});
+    /* RUNTIME ENGINE INVENTORY DATA SOURCE */
+    const inventoryData = [];
+    let runtimeId = 1;
 
-/* ================= LIVE DATABOUND SNAPSHOT LISTENER INITIALIZER ================= */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    location.href = "https://scratchlet.github.io/login/";
-    return;
-  }
+    Object.keys(packs).forEach(key => {
+        const currentPack = packs[key];
+        currentPack.blooks.forEach(blook => {
+            inventoryData.push({
+                id: runtimeId++,
+                name: blook.name,
+                rarity: blook.rarity,
+                chance: blook.chance,
+                image: blook.image || "",
+                rarityColor: blook.rarityColor || "#7f8c8d", // Fallback color if missing
+                packName: currentPack.name,
+                qty: Math.floor(Math.random() * 5) + 1 
+            });
+        });
+    });
 
-  Scratchlet.user = user;
-  Scratchlet.ref = doc(db, "users", user.uid);
+    /* INTERACTIVE FILTER AND SEARCH PROCESSING PIPELINE */
+    function processFilters() {
+        const scrollBox = document.getElementById("inventoryScrollContainer");
+        scrollBox.innerHTML = "";
+        
+        const searchVal = document.getElementById("blookSearchInput").value.toLowerCase().trim();
+        const dropDownVal = document.getElementById("categoryFilterDropdown").value;
+        
+        let validItems = inventoryData.filter(item => item.qty > 0);
+        
+        if(searchVal !== "") {
+            validItems = validItems.filter(item => item.name.toLowerCase().includes(searchVal));
+        }
+        
+        if(dropDownVal !== "all") {
+            const [filterType, targetValue] = dropDownVal.split(":");
+            if(filterType === "pack") {
+                validItems = validItems.filter(item => item.packName === targetValue);
+            } else if(filterType === "rarity") {
+                validItems = validItems.filter(item => item.rarity === targetValue);
+            }
+        }
+        
+        if (validItems.length === 0) {
+            scrollBox.innerHTML = `<div class="no-results-text">No matching Blooks found.</div>`;
+            return;
+        }
 
-  onSnapshot(Scratchlet.ref, (snap) => {
-    const data = snap.data();
-    if (!data) return;
+        const groups = {};
+        validItems.forEach(item => {
+            if(!groups[item.packName]) {
+                groups[item.packName] = [];
+            }
+            groups[item.packName].push(item);
+        });
 
-    Scratchlet.coins = data.coins || 0;
-    Scratchlet.inventory = data.ownedBlocks || []; 
-    Scratchlet.equipped = data.equipped || null;
+        Object.keys(groups).forEach(packTitle => {
+            const section = document.createElement("div");
+            section.className = "pack-section";
 
-    resetLogoutTimer();
-    window.dispatchEvent(new Event("scratchlet-update"));
-  });
-});
+            const titleEl = document.createElement("div");
+            titleEl.className = "pack-section-title";
+            titleEl.textContent = packTitle;
+            
+            const lineEl = document.createElement("hr");
+            lineEl.className = "pack-section-line";
 
-console.log("Scratchlet Engine Operational 🚀");
+            const gridEl = document.createElement("div");
+            gridEl.className = "blook-image-container";
+
+            groups[packTitle].forEach(item => {
+                const button = document.createElement("button");
+                button.className = "blook-img-btn";
+                button.onclick = () => openCardModal(item);
+                
+                const activeSrc = (item.image && item.image !== "") ? item.image : FALLBACK_IMAGE;
+
+                button.innerHTML = `
+                    <div class="blook-qty-badge" style="background-color: ${item.rarityColor};">${item.qty}</div>
+                    <img class="blook-graphic" src="${activeSrc}" alt="${item.name}">
+                `;
+                gridEl.appendChild(button);
+            });
+
+            section.appendChild(titleEl);
+            section.appendChild(lineEl);
+            section.appendChild(gridEl);
+            scrollBox.appendChild(section);
+        });
+    }
+
+    /* VIEW CARD MODAL CONTROLLERS */
+    function openCardModal(blookItem) {
+        selectedBlook = blookItem;
+        
+        document.getElementById("modalName").textContent = blookItem.name;
+        document.getElementById("modalRarity").textContent = blookItem.rarity;
+        document.getElementById("modalRarity").style.backgroundColor = blookItem.rarityColor;
+        document.getElementById("modalChance").textContent = blookItem.chance + "%";
+        document.getElementById("modalOwned").textContent = "Owned: " + blookItem.qty;
+        document.getElementById("modalGraphic").src = (blookItem.image && blookItem.image !== "") ? blookItem.image : FALLBACK_IMAGE;
+        
+        const price = rarityValues[blookItem.rarity] || 5;
+        document.getElementById("sellValue").textContent = price;
+        
+        document.getElementById("sellDupesBtn").style.display = blookItem.qty > 1 ? "block" : "none";
+
+        overlay.classList.add("show");
+        modalContainer.classList.add("show");
+    }
+
+    function closeCardModal() {
+        modalContainer.classList.remove("show");
+        if(!menu.classList.contains("open")) {
+            overlay.classList.remove("show");
+        }
+        selectedBlook = null;
+    }
+
+    /* QUANTITY ACCOUNT TRANSACTION PIPELINES */
+    document.getElementById("sellSingleBtn").onclick = () => {
+        if (!selectedBlook || selectedBlook.qty <= 0) return;
+        
+        const value = rarityValues[selectedBlook.rarity] || 5;
+        currentBalance += value;
+        selectedBlook.qty -= 1;
+        
+        updateSystemHUD();
+        
+        if (selectedBlook.qty === 0) {
+            closeCardModal();
+        } else {
+            openCardModal(selectedBlook);
+        }
+        processFilters();
+    };
+
+    document.getElementById("sellDupesBtn").onclick = () => {
+        if (!selectedBlook || selectedBlook.qty <= 1) return;
+        
+        const duplicateCount = selectedBlook.qty - 1;
+        const value = (rarityValues[selectedBlook.rarity] || 5) * duplicateCount;
+        
+        currentBalance += value;
+        selectedBlook.qty = 1;
+        
+        updateSystemHUD();
+        openCardModal(selectedBlook);
+        processFilters();
+    };
+
+    function updateSystemHUD() {
+        document.getElementById("coinCount").textContent = currentBalance;
+    }
+
+    processFilters();
 </script>
 </body>
 </html>
