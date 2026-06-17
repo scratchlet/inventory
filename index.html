@@ -587,11 +587,11 @@
             const userSnapshot = await getDoc(userDocRef);                
             if (userSnapshot.exists()) {            
                 const data = userSnapshot.data();            
-                coins = data.coins !== undefined ? data.coins : 2500;            
+                coins = data.coins !== undefined ? data.coins : 0;            
                 ownedBlocks = Array.isArray(data.ownedBlocks) ? data.ownedBlocks : [];        
             } else {            
                 // Force reset to 0 blooks and default starting coins for a new account
-                coins = 2500;            
+                coins = 0;            
                 ownedBlocks = [];            
                 await saveUserData();        
             }        
