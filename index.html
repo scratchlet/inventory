@@ -351,6 +351,7 @@
         .blook-img-btn.locked { filter: grayscale(100%); opacity: 0.55; cursor: not-allowed; }
         .blook-graphic { width: 75%; height: 75%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         
+        /* BADGE */
         .blook-qty-badge {
             position: absolute;
             top: -6px;
@@ -531,7 +532,9 @@
                 <div id="verificationWrapper" style="display: none; width: 100%;">
                     <input type="text" class="blook-verify-input" id="blookVerifyInput" placeholder='Type name to confirm'>
                 </div>
-                <button class="action-btn btn-sell" id="sellSingleBtn">Sell (🪙 <span id="sellValue">0</span>)</button>
+                <button class="action-btn btn-sell" id="sellSingleBtn">
+                    <span id="sellBtnLabel">Sell</span> (🪙 <span id="sellValue">0</span>)
+                </button>
                 <button class="action-btn btn-sell-dupes" id="sellDupesBtn">Sell Duplicates</button>
             </div>
         </div>
@@ -673,8 +676,9 @@
     const verifyInput = document.getElementById("blookVerifyInput");
     const verifyWrapper = document.getElementById("verificationWrapper");
     const sellSingleBtn = document.getElementById("sellSingleBtn");
+    const sellBtnLabel = document.getElementById("sellBtnLabel");
+    const sellValue = document.getElementById("sellValue");
     
-    // FIX: Catch clicks landing directly on the modal container outer alignment bounds
     modalContainer.onclick = (e) => {
         if (e.target === modalContainer) {
             closeCardModal();
@@ -886,9 +890,8 @@
         document.getElementById("modalGraphic").src = (blookItem.image && blookItem.image !== "") ? blookItem.image : FALLBACK_IMAGE;
         
         const price = rarityValues[blookItem.rarity] || 5;
-        document.getElementById("sellValue").textContent = price;
-        
-        sellSingleBtn.innerText = `Sell (🪙 ${price})`;
+        sellValue.textContent = price;
+        sellBtnLabel.textContent = "Sell";
         sellSingleBtn.disabled = false;
 
         const sellDupesBtn = document.getElementById("sellDupesBtn");
@@ -924,7 +927,8 @@
                 verifyWrapper.style.display = "block";
                 verifyInput.value = "";
                 verifyInput.placeholder = `Type "${selectedBlook.name}" to sell last one`;
-                sellSingleBtn.innerText = "Confirm Sell Last Blook";
+                sellBtnLabel.textContent = "Confirm Sell Last Blook";
+                sellValue.textContent = "";
                 sellSingleBtn.disabled = true;
                 return;
             } else {
