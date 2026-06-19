@@ -617,7 +617,7 @@
     let ownedBlocks = []; 
     let currentUser = null;
     let selectedBlook = null;
-    let customBlookData = {}; // Keeps track of configured settings items
+    let customBlookData = {}; 
 
     onAuthStateChanged(auth, async (user) => {  
         if (!user) {    
@@ -778,7 +778,7 @@
         }
     };
 
-    /* RARITY COLOR MATRIX MATRIX MAPS */
+    /* RARITY COLOR MATRIX MAPS */
     const rarityColors = {
         "Common": "#a6b1b7",
         "Uncommon": "limegreen",
@@ -877,6 +877,11 @@
         });
 
         Object.keys(groups).forEach(packTitle => {
+            // Hides the "Custom Pack" completely if it has 0 blooks in it under the current filter state
+            if (packTitle === "Custom Pack" && groups[packTitle].length === 0) {
+                return; 
+            }
+
             const section = document.createElement("div");
             section.className = "pack-section";
 
