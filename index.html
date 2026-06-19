@@ -214,9 +214,9 @@
             pointer-events: auto;
         }
         
-        /* INVENTORY LAYOUT CONTAINER */
+        /* INVENTORY LAYOUT CONTAINER - EXPANDED WIDE SCREEN ADJUSTMENT */
         .container {
-            max-width: 1200px;
+            max-width: 95%;
             margin: auto;
             padding: 25px;
             position: relative;
@@ -230,6 +230,7 @@
             padding: 30px;
             backdrop-filter: blur(8px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
         }
         
         .inventory-header {
@@ -312,7 +313,7 @@
         
         /* SCROLL CONTAINER RULES */
         .inventory-scroll-container {
-            max-height: 58vh;
+            max-height: 68vh;
             overflow-y: auto;
             padding-right: 8px;
             min-height: 120px;
@@ -572,6 +573,7 @@
                 <select class="filter-dropdown" id="categoryFilterDropdown">
                     <option value="all">All Blooks</option>
                     <optgroup label="Rarities">
+                        <option value="rarity:Common">Common</option>
                         <option value="rarity:Uncommon">Uncommon</option>
                         <option value="rarity:Rare">Rare</option>
                         <option value="rarity:Epic">Epic</option>
@@ -586,7 +588,7 @@
         </div>
         
         <div class="inventory-scroll-container" id="inventoryScrollContainer">
-            </div>
+        </div>
     </div>
 </div>
 
@@ -615,6 +617,7 @@
     let ownedBlocks = []; 
     let currentUser = null;
     let selectedBlook = null;
+    let customBlookData = {}; // Keeps track of configured settings items
 
     onAuthStateChanged(auth, async (user) => {  
         if (!user) {    
@@ -644,9 +647,11 @@
                 const data = userSnapshot.data();            
                 coins = data.coins !== undefined ? data.coins : 0;            
                 ownedBlocks = Array.isArray(data.ownedBlocks) ? data.ownedBlocks : [];        
+                customBlookData = data.customBlookData || {};
             } else {            
                 coins = 0;            
                 ownedBlocks = [];            
+                customBlookData = {};
                 await saveUserData();        
             }        
             document.getElementById("coinCount").innerText = coins;
@@ -662,7 +667,8 @@
             const userDocRef = doc(db, "users", currentUser.uid);        
             await setDoc(userDocRef, {            
                 coins: coins,            
-                ownedBlocks: ownedBlocks 
+                ownedBlocks: ownedBlocks,
+                customBlookData: customBlookData
             }, { merge: true });    
         } catch (error) {        
             console.error("Error saving backup cloud sync profile:", error);    
@@ -744,42 +750,54 @@
             ]
         },
 
-         medieval: {
-        name: "Medieval Pack",
-        blooks: [
-            {name:"Elf",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/Z5SfKjrN/Elf.webp"},
-            {name:"Witch",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/4xg8Nwzp/Witch.webp"},
-            {name:"Wizard",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/L8py6vzL/Wizard.webp"},
-            {name:"Fairy",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/fRNHT5x0/Fairy.webp"},
-            {name:"Slime Monster",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/HkgSs3Qc/Slime-Monster.webp"},
-            {name:"Jester",rarity:"Rare",rarityColor:"blue",chance:8.9,image:"https://i.postimg.cc/RZBPVGcJ/Jester.webp"},
-            {name:"Dragon",rarity:"Rare",rarityColor:"blue",chance:8.9,image:"https://i.postimg.cc/sgrnDKpx/Dragon.webp"},
-            {name:"Queen",rarity:"Rare",rarityColor:"blue",chance:8.9,image:"https://i.postimg.cc/dVYWtn8h/Queen.webp"},
-            {name:"Unicorn",rarity:"Epic",rarityColor:"red",chance:5.12,image:"https://i.postimg.cc/52VPNpwj/Unicorn.webp"},
-            {name:"King",rarity:"Legendary",rarityColor:"gold",chance:1,image:"https://i.postimg.cc/L8py6vzn/King.webp"},
-            {name:"Master Elf",rarity:"Chroma",rarityColor:"cyan",chance:0.075,image:"https://i.postimg.cc/Gp56nwS0/Master-Elf.webp"},
-            {name:"Agent Owl",rarity:"Chroma",rarityColor:"cyan",chance:0.075,image:"https://i.postimg.cc/yNb2C4rz/Agent-Owl.webp"},
-            {name:"Wise Owl",rarity:"Celestial",rarityColor:"teal",chance:0.025,image:"https://i.postimg.cc/yWqsN84V/Wise-Owl.webp"},
-            {name:"Phantom King",rarity:"Mystical",rarityColor:"purple",chance:0.005,image:"https://i.postimg.cc/dtBq8dC8/Phantom-King.gif"},
-        ]
-    },
+        medieval: {
+            name: "Medieval Pack",
+            blooks: [
+                {name:"Elf",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/Z5SfKjrN/Elf.webp"},
+                {name:"Witch",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/4xg8Nwzp/Witch.webp"},
+                {name:"Wizard",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/L8py6vzL/Wizard.webp"},
+                {name:"Fairy",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/fRNHT5x0/Fairy.webp"},
+                {name:"Slime Monster",rarity:"Uncommon",rarityColor:"limegreen",chance:13.4,image:"https://i.postimg.cc/HkgSs3Qc/Slime-Monster.webp"},
+                {name:"Jester",rarity:"Rare",rarityColor:"blue",chance:8.9,image:"https://i.postimg.cc/RZBPVGcJ/Jester.webp"},
+                {name:"Dragon",rarity:"Rare",rarityColor:"blue",chance:8.9,image:"https://i.postimg.cc/sgrnDKpx/Dragon.webp"},
+                {name:"Queen",rarity:"Rare",rarityColor:"blue",chance:8.9,image:"https://i.postimg.cc/dVYWtn8h/Queen.webp"},
+                {name:"Unicorn",rarity:"Epic",rarityColor:"red",chance:5.12,image:"https://i.postimg.cc/52VPNpwj/Unicorn.webp"},
+                {name:"King",rarity:"Legendary",rarityColor:"gold",chance:1,image:"https://i.postimg.cc/L8py6vzn/King.webp"},
+                {name:"Master Elf",rarity:"Chroma",rarityColor:"cyan",chance:0.075,image:"https://i.postimg.cc/Gp56nwS0/Master-Elf.webp"},
+                {name:"Agent Owl",rarity:"Chroma",rarityColor:"cyan",chance:0.075,image:"https://i.postimg.cc/yNb2C4rz/Agent-Owl.webp"},
+                {name:"Wise Owl",rarity:"Celestial",rarityColor:"teal",chance:0.025,image:"https://i.postimg.cc/yWqsN84V/Wise-Owl.webp"},
+                {name:"Phantom King",rarity:"Mystical",rarityColor:"purple",chance:0.005,image:"https://i.postimg.cc/dtBq8dC8/Phantom-King.gif"},
+            ]
+        },
 
-         rainbow: {
-        name: "Misc",
-        blooks: [
-          {name:"Rainbow",rarity:"Mystical",rarityColor:"purple",chance:100,image:"https://i.postimg.cc/G2J4YLyd/Rainbow.webp"},
-        ]
-    },
-        
+        rainbow: {
+            name: "Misc",
+            blooks: [
+              {name:"Rainbow",rarity:"Mystical",rarityColor:"purple",chance:100,image:"https://i.postimg.cc/G2J4YLyd/Rainbow.webp"},
+            ]
+        }
     };
 
-    const rarityValues = { "Uncommon": 5, "Rare": 20, "Epic": 75, "Legendary": 250, "Chroma": 300, "Celestial": 500, "Mystical": 1000 };
+    /* RARITY COLOR MATRIX MATRIX MAPS */
+    const rarityColors = {
+        "Common": "#a6b1b7",
+        "Uncommon": "limegreen",
+        "Rare": "blue",
+        "Epic": "red",
+        "Legendary": "gold",
+        "Chroma": "cyan",
+        "Celestial": "teal",
+        "Mystical": "purple"
+    };
+
+    const rarityValues = { "Common": 2, "Uncommon": 5, "Rare": 20, "Epic": 75, "Legendary": 250, "Chroma": 300, "Celestial": 500, "Mystical": 1000 };
     let inventoryData = [];
 
     function buildRuntimeInventory() {
         inventoryData = [];
         let runtimeId = 1;
 
+        // Process standard items catalog
         Object.keys(packs).forEach(key => {
             const currentPack = packs[key];
             currentPack.blooks.forEach(blook => {
@@ -797,6 +815,28 @@
                 });
             });
         });
+
+        // Merge Custom Config Pack entries from user customization blueprint nodes
+        const customBlookKeys = Object.keys(customBlookData);
+        if (customBlookKeys.length > 0) {
+            customBlookKeys.forEach(blookKey => {
+                const customBlook = customBlookData[blookKey];
+                const countOwned = ownedBlocks.filter(name => name === customBlook.name).length;
+                const matchColor = rarityColors[customBlook.rarity] || "#a6b1b7";
+
+                inventoryData.push({
+                    id: runtimeId++,
+                    name: customBlook.name,
+                    rarity: customBlook.rarity,
+                    chance: 0,
+                    image: customBlook.image || "",
+                    rarityColor: matchColor,
+                    packName: "Custom Pack",
+                    qty: countOwned
+                });
+            });
+        }
+
         processFilters();
     }
 
@@ -891,7 +931,7 @@
         document.getElementById("modalName").textContent = blookItem.name;
         document.getElementById("modalRarity").textContent = blookItem.rarity;
         document.getElementById("modalRarity").style.backgroundColor = blookItem.rarityColor;
-        document.getElementById("modalChance").textContent = blookItem.chance + "%";
+        document.getElementById("modalChance").textContent = blookItem.chance > 0 ? blookItem.chance + "%" : "Custom";
         document.getElementById("modalOwned").textContent = "Owned: " + blookItem.qty;
         document.getElementById("modalGraphic").src = (blookItem.image && blookItem.image !== "") ? blookItem.image : FALLBACK_IMAGE;
         
